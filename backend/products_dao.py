@@ -1,12 +1,10 @@
-import mysql.connector
+from sql_connection import get_sql_connection
 
 
-def get_all_products():
-    cnx = mysql.connector.connect(user='root', password='root123',
-                                host='127.0.0.1',
-                                database='gs_ms')
+def get_all_products(connection):
+    
 
-    cursor =cnx.cursor()
+    cursor = connection.cursor()
 
     query=("Select products.Products_id,products.Pname,products.uom_id,products.Priceperunit,uom.uom_name "
     "from products inner join uom on products.uom_id=uom.uom_id")
@@ -25,10 +23,26 @@ def get_all_products():
            }
        )
 
-
-    cnx.close()
-
     return response
 
+def inser_new_product(connection,product):
+    cursor =connection.cursor()
+
+    query = ("Insert into products "
+             "(Pname,uom_id,Priceperunit)"
+             "values (%s,%s,%s)")
+    data = (product['Product_name'],product['uom_id'],product['price_per_unit'])
+    cursor.execute(query,data)
+    connection.commit()
+
+    return cursor.lastrowid
+def delete_product(connection,Products_id):
+    cursor=connection.cursor()
+    query=("DELETE FROM products where Products_id=" + str(Products_id))
+    cursor.execute(query)
+    connection.commit()
+
+
 if __name__=='__main__':
-    print(get_all_products())
+    connection=get_sql_connection()
+    print(delete_product(connection,5))
